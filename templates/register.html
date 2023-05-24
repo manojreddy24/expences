@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>registration</title>
+</head>
+<style>
+
+.flashes {
+  color: green;
+}
+
+</style>
+
+
+
+<body>
+
+<form action="/register" method="post">
+    <label for="username">username</label>
+    <input type="text" name="username" placeholder="username">
+    <label for="email">email</label>
+    <input type="text" name="email" placeholder="email">
+    <label for="password">password</label>
+    <input type="password" name="password" placeholder="password">
+    <label for="confirm">confirm password</label>
+    <input type="password" name="confirm_password" placeholder="confirm password">
+    <label > dairycode </label>
+    <input type="number" name="dairycode" placeholder="dairycode">
+    <input type="submit" value="register">
+</form>
+
+{% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+
+
+</body>
+</html>
