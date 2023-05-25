@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Diary Calendar</title>
+  <h1>{{ username }} calendar</h1>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#calendar').fullCalendar({
+        selectable: true,
+        select: function(start, end) {
+          // Handle date selection here
+          var selectedDate = start.format('YYYY-MM-DD');
+          // You can store the selected date or perform further actions
+          console.log(selectedDate);
+
+          // Prompt user for action: view, write, or edit diary entry
+          var action = prompt("Please choose an action:\n1. View diary entry\n2. Write a new diary entry\n3. Edit existing diary entry");
+
+          // Redirect based on user's action
+          if (action === "1") {
+            // View diary entry
+            window.location.href = "/diary/" + selectedDate;
+          } else if (action === "2") {
+            // Write a new diary entry
+            window.location.href = "/create_entry?selected_date=" + selectedDate;
+          } else if (action === "3") {
+            // Edit existing diary entry
+            window.location.href = "/edit_entry/" + selectedDate;
+          } else {
+            // Invalid action, do nothing
+          }
+        }
+      });
+    });
+  </script>
+  <style>
+      .flashes {
+  color: red;
+}
+    #calendar {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="calendar"></div>
+
+</body>
+{% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+</html>

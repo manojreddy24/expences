@@ -42,7 +42,7 @@ def dairy_login():
 def create_expense_table():
     try:
         with connection.cursor() as cursor:
-            sql = """CREATE TABLE IF NOT EXISTS expenses (id INT NOT NULL AUTO_INCREMENT,username VARCHAR(200) NOT NULL,email VARCHAR(100) NOT NULL, expense_date DATE,amount DECIMAL(10, 2) NOT NULL,category VARCHAR(100) NOT NULL,notes TEXT,timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY (id),INDEX(username),INDEX(email),INDEX(TIMESTAMP),FOREIGN KEY (username) REFERENCES dairy_login(username),FOREIGN KEY (email) REFERENCES dairy_login(email))"""
+            sql = """CREATE TABLE IF NOT EXISTS expenses (id INT NOT NULL AUTO_INCREMENT,username VARCHAR(200) NOT NULL,email VARCHAR(100) NOT NULL, expense_date DATE,amount DECIMAL(10, 2) NOT NULL,category VARCHAR(100) NOT NULL,notes TEXT,timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,image LONGBLOB ,PRIMARY KEY (id),INDEX(username),INDEX(email),INDEX(TIMESTAMP),FOREIGN KEY (username) REFERENCES dairy_login(username),FOREIGN KEY (email) REFERENCES dairy_login(email))"""
             cursor.execute(sql)
             connection.commit()
         return "Table created: expenses"
@@ -365,6 +365,106 @@ def download_image():
         return send_file(img_io, mimetype='application/octet-stream', as_attachment=True,download_name='image.jpg')
     else:
         return redirect(url_for('login'))
+
+# @app.route('/main_table')
+def main_table():
+    try:
+        with connection.cursor() as cursor:
+            sql = "CREATE TABLE IF NOT EXISTS main_dairy (id INT NOT NULL AUTO_INCREMENT, username VARCHAR(200) NOT NULL, email VARCHAR(100) NOT NULL, title VARCHAR(200) NOT NULL, content TEXT NOT NULL, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, images VARCHAR(255), PRIMARY KEY (id), FOREIGN KEY (username) REFERENCES dairy_login(username), FOREIGN KEY (email) REFERENCES dairy_login(email))"
+            cursor.execute(sql)
+            connection.commit()
+        return "Table created: main_dairy"
+    except pymysql.err.OperationalError as e:
+        return "Error creating table: " + str(e)
+
+
+@app.route('/create_diary', methods=['GET', 'POST'])
+def create_diary():
+    if 'username' not in session:
+        return redirect('/login')  # Redirect to login page if user is not logged in
+
+    if request.method == 'POST':
+        # Retrieve form data
+        title = request.form['title']
+        content = request.form['content']
+        username = session['username']
+        email = session['email']
+        date=request.form['date']
+
+        # Get system timestamp
+        current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Connect to MySQL and execute the INSERT query
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO main_dairy (username, email, title, content, timestamp,date) VALUES (%s, %s, %s, %s, %s,%s)"
+            cursor.execute(sql, (username, email, title, content, current_timestamp,date))
+            connection.commit()
+
+
+
+        return redirect('/diary')  # Redirect to the diary page after successful entry creation
+
+    return render_template('create_diary.html')
+
+@app.route('/diary', methods=['GET', 'POST'])
+def diary():
+    if 'username' in session:
+        username = session['username']
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM main_dairy WHERE username = %s ORDER BY timestamp DESC"
+            cursor.execute(sql, (username))
+            diary = cursor.fetchall()
+
+        return render_template('diary.html', diary=diary, username=username)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/edit_diary', methods=['GET', 'POST'])
+def edit_diary():
+    if 'username' in session:
+        if request.method == 'POST':
+            dairy_id=request.form['dairy_id']
+            title = request.form['title']
+            content = request.form['content']
+            date=request.form['date']
+
+            with connection.cursor() as cursor:
+                sql="UPDATE main_dairy SET title=%s,content=%s,date=%s WHERE id=%s"
+                cursor.execute(sql, (title, content,date,dairy_id))
+                connection.commit()
+            return redirect('/diary')
+        else:
+            dairy_id = request.args.get('id')
+
+            with connection.cursor() as cursor:
+                sql = "SELECT * FROM main_dairy WHERE id = %s"
+                cursor.execute(sql, (dairy_id,))
+                dairy = cursor.fetchone()
+
+            return render_template('edit_diary.html', expense=dairy)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/delete_diary', methods=['GET'])
+def delete_diary():
+    if 'username' in session:
+        if request.method == 'GET':
+            dairy_id = request.args.get('id')
+
+        with connection.cursor() as cursor:
+            sql = "DELETE FROM main_dairy WHERE id = %s"
+            cursor.execute(sql, (dairy_id))
+            connection.commit()
+
+        return redirect('/diary')
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

@@ -8,10 +8,19 @@
 <body>
 
 <h1> hello {{session.username}}</h1>
-<a href="/expense_entry">expense_entry</a>
-<a href="/expences_view">expenses_view</a>
 
-<a href="/logout">logout</a>
+
+
+<a class="create-btn" href="/create_diary"><i class="fas fa-plus"></i> create diary</a>
+<a class="view-btn" href="/diary"><i class="fas fa-eye"></i> view diary</a>
+<br>
+<a class="entry-btn" href="/expense_entry"><i class="fas fa-plus"></i> expense_entry</a>
+<a class="view-btn" href="/expences_view"><i class="fas fa-eye"></i> expenses_view</a>
+<br>
+<a class="logout-btn" href="/logout"><i class="fas fa-sign-out-alt"></i> logout</a>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" integrity="sha512-**********" crossorigin="anonymous"></script>
 
 
 </body>

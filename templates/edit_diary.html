@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Expense</title>
+</head>
+
+<body>
+    <h1>Edit diary</h1>
+    <form method="POST" action="/edit_diary" enctype="multipart/form-data">
+        <input type="hidden" name="dairy_id" value="{{ expense[0] }}">
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title" value="{{expense[3]}}" ><br>
+       <label for="content">Content:</label><br>
+        <textarea name="content" id="content" rows="4" cols="50" value="{{expense[4]}}"></textarea><br>
+       <label for="date">Date:</label>
+        <input type="date" name="date" id="date" value="{{expense[6]}}"><br><br>
+        <br><br>
+        <input type="submit" value="Save">
+    </form>
+</body>
+</html>

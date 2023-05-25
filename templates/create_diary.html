@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Diary Entry</title>
+</head>
+<body>
+    <h1>Create Diary Entry</h1>
+    <form method="POST" action="/create_diary">
+
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title" required><br>
+
+        <label for="content">Content:</label><br>
+        <textarea name="content" id="content" rows="4" cols="50" required></textarea><br>
+       <label for="date">Date:</label>
+        <input type="date" name="date" id="date" ><br><br>
+
+
+        <input type="submit" value="Create Entry">
+    </form>
+</body>
+</html>
