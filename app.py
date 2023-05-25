@@ -5,6 +5,9 @@ from datetime import *
 import random
 import string
 import smtplib
+import base64
+from io import BytesIO
+import os
 from email.mime.text import MIMEText
 app.permanent_session_lifetime=timedelta(minutes=10)
 app = Flask(__name__,template_folder="templates",static_folder="static")
@@ -207,7 +210,7 @@ def index():
     else:
         return redirect(url_for('login'))
 
-
+app.config['UPLOAD_FOLDER'] = 'static'
 @app.route('/expense_entry', methods=['GET', 'POST'])
 def expense_entry():
     if 'username' in session:  # Check if the username is stored in the session
@@ -219,13 +222,18 @@ def expense_entry():
             notes = request.form['notes']
             timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             date = request.form['date']
+            image = request.files['image']
+            image_data = image.read()
+            # print("image_data",image_data)
+
+
 
 
 
             # Insert the expense data into the expenses table
             with connection.cursor() as cursor:
-                sql = "INSERT INTO expenses (username,email, category, amount, timestamp, notes,expense_date ) VALUES (%s,%s,%s, %s, %s, %s,%s)"
-                cursor.execute(sql, (username,email, category, amount, timestamp, notes,date))
+                sql = "INSERT INTO expenses (username,email, category, amount, timestamp, notes,expense_date,image ) VALUES (%s,%s,%s, %s, %s, %s,%s,%s)"
+                cursor.execute(sql, (username,email, category, amount, timestamp, notes,date,image_data ))
                 connection.commit()
 
             return redirect(url_for('view_expenses'))
@@ -262,15 +270,18 @@ def edit_expense():
     if 'username' in session:  # Check if the username is stored in the session
         if request.method == 'POST':
             expense_id = request.form['expense_id']
-
             category = request.form['category']
             amount = float(request.form['amount'])
             date = request.form['date']
             notes = request.form['notes']
+            image = request.files['image']
+            image_data = image.read()
+            # print("image_data", image_data)
 
             with connection.cursor() as cursor:
-                sql = "UPDATE expenses SET category = %s, amount = %s, expense_date = %s, notes = %s WHERE id = %s"
-                cursor.execute(sql, (category, amount, date, notes, expense_id))
+                sql = "UPDATE expenses SET category = %s, amount = %s, expense_date = %s, notes = %s , image= %s WHERE id = %s"
+                # print(sql)
+                cursor.execute(sql, (category, amount, date, notes, image_data,expense_id))
                 connection.commit()
 
             return redirect('/expences_view')
@@ -299,6 +310,59 @@ def delete_expense():
             connection.commit()
 
         return redirect('/expences_view')
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/view_image', methods=['GET', 'POST'])
+def view_image():
+    if 'username' in session:
+        if request.method == 'GET':
+            expense_id = request.args.get('id')
+
+        with connection.cursor() as cursor:
+            sql = "SELECT image FROM expenses WHERE id = %s"
+            cursor.execute(sql, (expense_id))
+            image = cursor.fetchone()
+            # print("image",image[0])
+        if image[0] is None:
+            image_data = None
+            return 'Image not found.'
+        # Decode the base64-encoded image data
+        encoded_image = image[0]
+        image_data = base64.b64encode(encoded_image).decode('utf-8')
+
+        return render_template('view_image.html', image_data=image_data, expense_id=expense_id)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/download_image', methods=['GET', 'POST'])
+def download_image():
+    if 'username' in session:
+        if request.method == 'GET':
+            expense_id = request.args.get('id')
+
+        with connection.cursor() as cursor:
+            sql = "SELECT image FROM expenses WHERE id = %s"
+            cursor.execute(sql, (expense_id))
+            image = cursor.fetchone()
+
+        if image[0] is None:
+            return 'Image not found.'
+
+        # Decode the base64-encoded image data
+        encoded_image = image[0]
+        image_data = base64.b64decode(encoded_image)
+
+        # Create a BytesIO object so that we can write the file contents to it
+        img_io = BytesIO(image_data)
+
+
+
+        # Seek back to the start of the stream
+        img_io.seek(0)
+
+        # Send the file contents and headers to the browser so that it downloads the file as "image.png"
+        return send_file(img_io, mimetype='application/octet-stream', as_attachment=True,download_name='image.jpg')
     else:
         return redirect(url_for('login'))
 

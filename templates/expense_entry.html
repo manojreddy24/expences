@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Expense Entry</h1>
-    <form action="/expense_entry" method="POST">
+    <form action="/expense_entry" method="POST" enctype="multipart/form-data">
         <label for="category">Category:</label>
         <input type="text" name="category" id="category" required>
         <br><br>
@@ -17,6 +17,9 @@
         <input type="date" name="date" id="date" ><br><br>
         <label for="notes">Notes:</label>
         <textarea name="notes" id="notes" rows="4" cols="50"></textarea>
+        <br><br>
+        <label for="image">Image:   </label>
+        <input type="file" name="image" id="image"><br><br>
         <br><br>
         <input type="submit" value="Submit">
     </form>
