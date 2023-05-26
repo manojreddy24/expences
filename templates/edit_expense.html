@@ -2,10 +2,21 @@
 <html>
 <head>
     <title>Edit Expense</title>
+    <style>
+        .right-top {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+
 </head>
 
 <body>
     <h1>Edit Expense</h1>
+    <div class="right-top">
+        <a href="/index">Home</a>
+    </div>
     <form method="POST" action="/edit_expense" enctype="multipart/form-data">
         <input type="hidden" name="expense_id" value="{{ expense[0] }}">
         <label for="category">Category:</label>

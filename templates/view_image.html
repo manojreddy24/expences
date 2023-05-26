@@ -2,9 +2,19 @@
 <html>
 <head>
     <title>View Image</title>
+    <style>
+        .right-top {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>View Image</h1>
+    <div class="right-top">
+        <a href="/index">Home</a>
+    </div>
     <img src="data:image/jpeg;base64,{{ image_data }}" alt="Image">
 <!--<a class="download-btn" href="/download_image?id={{ expense_id }}"><i class="fas fa-download"></i> Download</a>-->
 </body>
