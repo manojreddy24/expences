@@ -7,9 +7,11 @@ import string
 import smtplib
 import base64
 from io import BytesIO
+import pytz
 import os
+
 from email.mime.text import MIMEText
-app.permanent_session_lifetime=timedelta(minutes=10)
+app.permanent_session_lifetime=timedelta(seconds=15)
 app = Flask(__name__,template_folder="templates",static_folder="static")
 app.secret_key="manbigdat"
 # Connect to PHPMyAdmin cloud database
@@ -26,6 +28,31 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'itsmymail425@gmail.com'
 EMAIL_HOST_PASSWORD = 'llhattqaxodqhyjp'
 EMAIL_PORT = 587
+
+@app.before_request
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(seconds=15)
+    session.modified = True
+
+    if 'last_activity' in session:
+        elapsed_time = timedelta(seconds=15)
+        last_activity = session['last_activity']
+        print(last_activity)
+        # Get the client's timezone from the request headers
+        client_timezone = request.headers.get('Timezone')
+
+        # Get the current time in the client's timezone
+        current_time = datetime.now(pytz.timezone(client_timezone))
+
+        if (current_time - last_activity) > elapsed_time:
+            # Session has expired, redirect to the login page
+            return "Session expired"
+    session['last_activity'] = datetime.now(pytz.timezone(client_timezone))
+
+
+
+
 # @app.route('/dairy_login')
 def dairy_login():
     try:
@@ -165,7 +192,8 @@ def verify(email):
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
+    session.clear()  # Clear all session data
+    # session.pop('username', None)
     return redirect(url_for('login'))
 
 
@@ -176,10 +204,10 @@ def login():
         username = request.form['username']
         password = request.form['password']
         hashed = hash_password(password)
-        print("username",username)
-        print("password",hashed)
+        # print("username",username)
+        # print("password",hashed)
         sql="select * from dairy_login where username='{}' and password='{}'".format(username,hashed)
-        print("sql",sql)
+        # print("sql",sql)
 
         with connection.cursor() as cursor:
             cursor.execute(sql)
@@ -190,10 +218,11 @@ def login():
 
             if data:
                 session['username'] = username  # Store the username in the session
+                # print("session",session['username'])
 
 
 
-                return redirect(url_for('index'))
+                return render_template('dairycode.html', username=session['username'])  # Pass the username to the template
             else:
                 flash("Invalid username or password")
                 return redirect(url_for('login'))
@@ -201,19 +230,44 @@ def login():
 
     return render_template('login.html')
 
-
-@app.route('/index')
-def index():
+@app.route('/dairycode', methods=['GET', 'POST'])
+def dairycode():
     if 'username' in session:  # Check if the username is stored in the session
         username = session['username']  # Retrieve the username from the session
-        return render_template('index.html', username=username)  # Pass the username to the template
+        if request.method=="POST":
+            code=request.form['code']
+            # print("code",code)
+            with connection.cursor() as cursor:
+                sql="select * from dairy_login where username='{}' and dairycode={}".format(username,code)
+                cursor.execute(sql)
+                data = cursor.fetchone()
+                # print("data",data)
+
+                if data:
+                    session['dairycode'] = code  # Store the username in the session
+                    return render_template('index.html', username=username)  # Pass the username to the template
+                else:
+                    flash("Invalid dairycode")
+                    return redirect(url_for('dairycode'))
+
+        return render_template('dairycode.html')  # Pass the username to the template
     else:
         return redirect(url_for('login'))
 
+
+@app.route('/index')
+def index():
+    if 'username' and 'dairycode' in session:  # Check if the username is stored in the session
+        username = session['username']  # Retrieve the username from the session
+        dairycode = session['dairycode']
+        # print("dairycode",dairycode)
+        return render_template('index.html', username=username)  # Pass the username to the template
+    else:
+        return redirect(url_for('login'))
 app.config['UPLOAD_FOLDER'] = 'static'
 @app.route('/expense_entry', methods=['GET', 'POST'])
 def expense_entry():
-    if 'username' in session:  # Check if the username is stored in the session
+    if 'username'  and 'dairycode' in session:  # Check if the username is stored in the session
         username = session['username']
         email=session['email']
         if request.method == 'POST':
@@ -246,7 +300,7 @@ def expense_entry():
 
 @app.route('/expences_view', methods=['GET'])
 def view_expenses():
-    if 'username' in session:  # Check if the username is stored in the session
+    if 'username' and 'dairycode' in session:  # Check if the username is stored in the session
 
         username = session['username']
 
@@ -267,7 +321,7 @@ def view_expenses():
 
 @app.route('/edit_expense', methods=['GET', 'POST'])
 def edit_expense():
-    if 'username' in session:  # Check if the username is stored in the session
+    if 'username' and 'dairycode' in session:  # Check if the username is stored in the session
         if request.method == 'POST':
             expense_id = request.form['expense_id']
             category = request.form['category']
@@ -300,7 +354,7 @@ def edit_expense():
 
 @app.route('/delete_expense', methods=['GET'])
 def delete_expense():
-    if 'username' in session:  # Check if the username is stored in the session
+    if 'username' and 'dairycode' in session:  # Check if the username is stored in the session
         if request.method == 'GET':
             expense_id = request.args.get('id')
 
@@ -315,7 +369,7 @@ def delete_expense():
 
 @app.route('/view_image', methods=['GET', 'POST'])
 def view_image():
-    if 'username' in session:
+    if 'username' and 'dairycode' in session:
         if request.method == 'GET':
             expense_id = request.args.get('id')
 
@@ -337,7 +391,7 @@ def view_image():
 
 @app.route('/download_image', methods=['GET', 'POST'])
 def download_image():
-    if 'username' in session:
+    if 'username' and 'dairycode' in session:
         if request.method == 'GET':
             expense_id = request.args.get('id')
 
@@ -380,35 +434,37 @@ def main_table():
 
 @app.route('/create_diary', methods=['GET', 'POST'])
 def create_diary():
-    if 'username' not in session:
-        return redirect('/login')  # Redirect to login page if user is not logged in
+    if 'username' and 'dairycode' in session:
 
-    if request.method == 'POST':
-        # Retrieve form data
-        title = request.form['title']
-        content = request.form['content']
-        username = session['username']
-        email = session['email']
-        date=request.form['date']
+
+        if request.method == 'POST':
+            # Retrieve form data
+            title = request.form['title']
+            content = request.form['content']
+            username = session['username']
+            email = session['email']
+            date=request.form['date']
 
         # Get system timestamp
-        current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Connect to MySQL and execute the INSERT query
-        with connection.cursor() as cursor:
-            sql = "INSERT INTO main_dairy (username, email, title, content, timestamp,date) VALUES (%s, %s, %s, %s, %s,%s)"
-            cursor.execute(sql, (username, email, title, content, current_timestamp,date))
+            # Connect to MySQL and execute the INSERT query
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO main_dairy (username, email, title, content, timestamp,date) VALUES (%s, %s, %s, %s, %s,%s)"
+                cursor.execute(sql, (username, email, title, content, current_timestamp,date))
             connection.commit()
 
 
 
-        return redirect('/diary')  # Redirect to the diary page after successful entry creation
+            return redirect('/diary')  # Redirect to the diary page after successful entry creation
 
-    return render_template('create_diary.html')
+        return render_template('create_diary.html')
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/diary', methods=['GET', 'POST'])
 def diary():
-    if 'username' in session:
+    if 'username' and 'dairycode' in session:
         username = session['username']
         with connection.cursor() as cursor:
             sql = "SELECT * FROM main_dairy WHERE username = %s ORDER BY timestamp DESC"
@@ -421,7 +477,7 @@ def diary():
 
 @app.route('/edit_diary', methods=['GET', 'POST'])
 def edit_diary():
-    if 'username' in session:
+    if 'username' and 'dairycode' in session:
         if request.method == 'POST':
             dairy_id=request.form['dairy_id']
             title = request.form['title']
@@ -447,7 +503,7 @@ def edit_diary():
 
 @app.route('/delete_diary', methods=['GET'])
 def delete_diary():
-    if 'username' in session:
+    if 'username' and 'dairycode' in session:
         if request.method == 'GET':
             dairy_id = request.args.get('id')
 
@@ -457,13 +513,6 @@ def delete_diary():
             connection.commit()
 
         return redirect('/diary')
-
-
-
-
-
-
-
 
 
 

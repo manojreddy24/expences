@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+</head>
+<body>
+<h1> hello {{username}} enter your code</h1>
+{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form action="/dairycode" method="post">
+        <input type="number" name="code" placeholder="Enter code" id="code" required>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
