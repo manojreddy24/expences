@@ -29,28 +29,28 @@ EMAIL_HOST_USER = 'itsmymail425@gmail.com'
 EMAIL_HOST_PASSWORD = 'llhattqaxodqhyjp'
 EMAIL_PORT = 587
 
-@app.before_request
-def before_request():
-    session.permanent = True
-    app.permanent_session_lifetime = timedelta(seconds=15)
-    session.modified = True
-
-    if 'last_activity' in session:
-        elapsed_time = timedelta(seconds=15)
-        last_activity = session['last_activity']
-        print(last_activity)
-        # Get the client's timezone from the request headers
-        client_timezone = request.headers.get('Timezone')
-
-        # Get the current time in the client's timezone
-        current_time = datetime.now(pytz.timezone(client_timezone))
-
-        if (current_time - last_activity) > elapsed_time:
-            # Session has expired, redirect to the login page
-            return "Session expired"
-    session['last_activity'] = datetime.now(pytz.timezone(client_timezone))
-
-
+# @app.before_request
+# def before_request():
+#     session.permanent = True
+#     app.permanent_session_lifetime = timedelta(seconds=15)
+#     session.modified = True
+#
+#     if 'last_activity' in session:
+#         elapsed_time = timedelta(seconds=15)
+#         last_activity = session['last_activity']
+#         print(last_activity)
+#         # Get the client's timezone from the request headers
+#         client_timezone = request.headers.get('Timezone')
+#
+#         # Get the current time in the client's timezone
+#         current_time = datetime.now(pytz.timezone(client_timezone))
+#
+#         if (current_time - last_activity) > elapsed_time:
+#             # Session has expired, redirect to the login page
+#             return "Session expired"
+#     session['last_activity'] = datetime.now(pytz.timezone(client_timezone))
+#
+#
 
 
 # @app.route('/dairy_login')
