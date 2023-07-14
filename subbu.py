@@ -14,15 +14,25 @@ def create_table():
         sql="CREATE TABLE IF NOT EXISTS games (name VARCHAR(20), won int Not NULL, lost int Not NULL, draw int Not NULL, games int Not NULL)"
         cursor.execute(sql)
         connection.commit()
+        print("Table created")
 
 
 def view():
     with connection.cursor() as cursor:
-        sql="SELECT * FROM games order by won desc"
+        sql = "SELECT * FROM games ORDER BY won DESC"
         cursor.execute(sql)
-        result=cursor.fetchall()
-        for row in result:
-            print(row)
+        result = cursor.fetchall()
+
+        if result:
+            # Print column headers
+            print("{:<10} {:<10} {:<10} {:<10} {:<10}".format("Name", "Won", "Lost", "Tie", "Total"))
+            print("------------------------------------------------")
+            for row in result:
+                name, won, lost, tie, total = row
+                print("{:<10} {:<10} {:<10} {:<10} {:<10}".format(name, won, lost, tie, total))
+        else:
+            print("No data found in the 'games' table.")
+
 #update
 def add():
     namee=input("Name: ")
@@ -55,7 +65,7 @@ def option():
     print("add  - Add a player")
     print("del  - Delete a player")
     print("exit - Exit program\n")
-    print("Command: ")
+    print("Command: ", end="")
     choice=input()
     if choice=="view":
         view()
@@ -65,6 +75,8 @@ def option():
         delete()
     elif choice=="exit":
         sys.exit()
+    elif choice=="table":
+        create_table()
 
 
 
