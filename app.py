@@ -7,9 +7,6 @@ import string
 import smtplib
 import base64
 from io import BytesIO
-import pytz
-import os
-
 from email.mime.text import MIMEText
 app.permanent_session_lifetime=timedelta(seconds=15)
 app = Flask(__name__,template_folder="templates",static_folder="static")
