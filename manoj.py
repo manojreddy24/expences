@@ -15,8 +15,13 @@ def jacobi(A, b, N=100, guess=None):
     x = guess.copy()
 
     # # Iterate for N times
-    for i in range(N):
-        x = (b - dot(R, x)) / D
+    # for i in range(N):
+    #     x = (b - dot(R, x)) / D
+    #
+    # return x
+    for _ in range(N):
+        x_new = (b - np.dot(A, x) + np.multiply(D, x)) / D
+        x = x_new
 
     return x
 
