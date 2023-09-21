@@ -39,21 +39,58 @@ def gauss_seidel(A, b, tolerance=0.01, N=100, guess=None):
     n = len(A)
 
     # Iterate
+    count = 0
     for k in range(N):
 
         x_old = x.copy()
 
         # Loop over rows
+
         for i in range(n):
             s1 = np.dot(A[i, :i], x[:i])
             s2 = np.dot(A[i, i + 1:], x_old[i + 1:])
             x[i] = (b[i] - s1 - s2) / A[i, i]
+            count=count+1
+            print("x[i] is",count)
 
         # Stop condition
         if np.linalg.norm(x - x_old, ord=np.inf) / np.linalg.norm(x, ord=np.inf) < tolerance:
             return x
 
     return x
+
+
+def sor(A,b,N=100,tolerance=0.01,guess=None,w=1.1):
+    print("SOR")
+    if guess is None:
+        guess = np.zeros(len(A[0]), dtype=np.double)
+
+    # Initialize the solution vector
+    x = guess.copy()
+    print(x)
+    n = len(A)
+
+    # Iterate
+    count = 0
+    for iteration in range(N):
+        for i in range(n):
+            sum1 = np.dot(A[i, :i], x[:i])
+            sum2 = np.dot(A[i, (i + 1):], x[(i + 1):])
+            x[i] = (1 - w) * x[i] + (w / A[i, i]) * (b[i] - sum1 - sum2)
+            count = count + 1
+            print("x[i] is", count)
+
+        if np.linalg.norm(np.dot(A, x) - b) < tolerance:
+            return x
+
+    return x
+
+
+
+
+
+
+
 
 
 A=array([[3,1,-1],[2,4,1],[-1,2,5]])
@@ -89,3 +126,5 @@ print(sols)
 sol=gauss_seidel(A, b, tolerance=0.01, N=100, guess=None)
 print("x:")
 print(sol)
+sor=sor(A,b,N=100,tolerance=0.01,guess=None,w=1.1)
+print(sor)
