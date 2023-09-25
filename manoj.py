@@ -6,25 +6,32 @@ def jacobi(A, b, N=100, guess=None):
     print("Jacobi")
     """Solves the equation Ax=b via the Jacobi iterative method."""
     # Create an initial guess if needed
+    count=0
     if guess is None:
         guess = zeros(len(A[0]))
+        print("guess",guess)
     D = diag(A)
+    # print(D)
     R = A - diagflat(D)
+    # print(R)
 
     # Create a vector of the diagonal elements of A
     # # Initialize the solution vector
     x = guess.copy()
+    # print(x)
 
-    # # Iterate for N times
-    # for i in range(N):
-    #     x = (b - dot(R, x)) / D
-    #
-    # return x
-    for _ in range(N):
-        x_new = (b - np.dot(A, x) + np.multiply(D, x)) / D
-        x = x_new
+    # Iterate for N times
+    for i in range(N):
+        x = (b - dot(R, x)) / D
 
     return x
+    # for _ in range(N):
+    #     x_new = (b - np.dot(A, x) + np.multiply(D, x)) / D
+    #     x = x_new
+    #     count+=1
+    # print("x[",count,"]=",x)
+    #
+    # return x
 
 def gauss_seidel(A, b, tolerance=0.01, N=100, guess=None):
     print("Gauss Seidel")
@@ -51,15 +58,16 @@ def gauss_seidel(A, b, tolerance=0.01, N=100, guess=None):
             s2 = np.dot(A[i, i + 1:], x_old[i + 1:])
             x[i] = (b[i] - s1 - s2) / A[i, i]
             count=count+1
-            print("x[i] is",count)
+
 
         # Stop condition
         if np.linalg.norm(x - x_old, ord=np.inf) / np.linalg.norm(x, ord=np.inf) < tolerance:
             return x
+        print( count)
 
     return x
-
-
+#
+#
 def sor(A,b,N=100,tolerance=0.01,guess=None,w=1.1):
     print("SOR")
     if guess is None:
@@ -78,10 +86,11 @@ def sor(A,b,N=100,tolerance=0.01,guess=None,w=1.1):
             sum2 = np.dot(A[i, (i + 1):], x[(i + 1):])
             x[i] = (1 - w) * x[i] + (w / A[i, i]) * (b[i] - sum1 - sum2)
             count = count + 1
-            print("x[i] is", count)
+
 
         if np.linalg.norm(np.dot(A, x) - b) < tolerance:
             return x
+        print( count)
 
     return x
 
@@ -93,9 +102,13 @@ def sor(A,b,N=100,tolerance=0.01,guess=None,w=1.1):
 
 
 
-A=array([[3,1,-1],[2,4,1],[-1,2,5]])
-b=array([4,1,1])
-guess = array([0,0,0])
+
+
+
+
+A=array([[3,-1,0,0,0,1/2],[-1,3,-1,0,1/2,0],[0,-1,3,-1,0,0],[0,0,-1,3,-1,0],[0,1/2,0,-1,3,-1],[1/2,0,0,0,-1,3]])
+b=array([5/2,3/2,1,1,3/2,5/2])
+guess = array([0,0,0,0,0,0])
 D = diag(A)
 # print(D)
 if np.all(D > np.abs(A).sum(axis=1) - D):
@@ -109,22 +122,22 @@ else:
             print("Row exchange")
             A[[i, np.argmax(np.abs(A[i:, i]))]] = A[[np.argmax(np.abs(A[i:, i])), i]]
             b[[i, np.argmax(np.abs(A[i:, i]))]] = b[[np.argmax(np.abs(A[i:, i])), i]]
-            print(A)
-            print(b)
+            # print(A)
+            # print(b)
             print("Row exchange done")
             break
 print("A:")
-pprint(A)
+# pprint(A)
 
 print("b:")
-pprint(b)
+# pprint(b)
 
 
-sols = jacobi(A, b, N=100, guess=guess)
-print(sols)
-# sol = gauss_seidel(A, b, N=100, guess=guess)
-sol=gauss_seidel(A, b, tolerance=0.01, N=100, guess=None)
+jacobi = jacobi(A, b, N=7, guess=guess)
+print(jacobi)
+sol = gauss_seidel(A, b, N=50,guess=guess)
+seidal=gauss_seidel(A, b, tolerance=0.01, N=100, guess=None)
 print("x:")
-print(sol)
-sor=sor(A,b,N=100,tolerance=0.01,guess=None,w=1.1)
+print(seidal)
+sor=sor(A,b,N=5,tolerance=0.01,guess=None,w=1.1)
 print(sor)
