@@ -36,6 +36,6 @@ A = np.array([[3, -1, 0, 0, 0, 1 / 2],
 b = np.array([5 / 2, 3 / 2, 1, 1, 3 / 2, 5 / 2])
 init_guess = np.array([0, 0, 0, 0, 0, 0])
 error_tolerance = 0.01
-omega = 1.1
+omega = 1
 u1, u2, u3, u4, u5, u6 = sor(A, b, init_guess, omega, error_tolerance, N=100)
 print(f'Solution: u1={u1}, u2={u2}, u3={u3}, u4={u4}, u5={u5}, u6={u6}')
