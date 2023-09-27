@@ -18,8 +18,7 @@ def gauss_seidel(A, b, init_guess, error_tolerance, N=100):
             print(f'Converged after {iteration + 1} iterations with error {e:.6f}')
             return u1, u2, u3, u4, u5, u6
         x=np.array([u1, u2, u3, u4, u5, u6])
-    print(f'Reached maximum iterations ({N}) without convergence. Error: {e:.6f}')
-    return u1, u2, u3, u4, u5, u6
+    print(f'Did not converge after {iteration + 1} iterations')
 
 
 

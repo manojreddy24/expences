@@ -12,19 +12,20 @@ def sor(A, b, init_guess, omega, error_tolerance, N=100):
         u6 = (b[5] - (A[5, 0] * u1 + A[5, 1] * u2 + A[5, 2] * u3 + A[5, 3] * u4 + A[5, 4] * u5)) / A[5, 5]
 
         new_x = omega * np.array([u1, u2, u3, u4, u5, u6]) + (1 - omega) * x
-        print(new_x)
+        # print(new_x)
 
         print(f'Iteration {iteration + 1}: u1={u1}, u2={u2}, u3={u3}, u4={u4}, u5={u5}, u6={u6}')
 
         e = np.max(np.abs(new_x - x))
-        print(f'Error: {e:.6f}')
+        # ett=np.abs(new_x - x)
+        # print(f'Error: {ett}')
+        # print(f'Error: {e:.6f}')
 
-        if e < error_tolerance:
+        if (e < error_tolerance):
             print(f'Converged after {iteration + 1} iterations with error {e:.6f}')
             return u1, u2, u3, u4, u5, u6
         x = new_x.copy()
-    print(f'Reached maximum iterations ({N}) without convergence. Error: {e:.6f}')
-    return u1, u2, u3, u4, u5, u6
+    print(f'Failed to converge after {iteration + 1} iterations')
 
 
 A = np.array([[3, -1, 0, 0, 0, 1 / 2],
@@ -36,6 +37,6 @@ A = np.array([[3, -1, 0, 0, 0, 1 / 2],
 b = np.array([5 / 2, 3 / 2, 1, 1, 3 / 2, 5 / 2])
 init_guess = np.array([0, 0, 0, 0, 0, 0])
 error_tolerance = 0.01
-omega = 1
+omega = 1.1
 u1, u2, u3, u4, u5, u6 = sor(A, b, init_guess, omega, error_tolerance, N=100)
 print(f'Solution: u1={u1}, u2={u2}, u3={u3}, u4={u4}, u5={u5}, u6={u6}')
