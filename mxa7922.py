@@ -1,4 +1,7 @@
-
+# References
+#https://copyprogramming.com/howto/diagonal-matrix-in-python
+# https://math.sci.ccny.cuny.edu/document/328Code
+# https://docs.python.org/3/library/string.html#format-specification-mini-language
 import numpy as np
 from numpy import array, zeros, diag, diagflat, dot
 def jacobi(A, b, init_guess, error_tolerance, N=100):
@@ -21,7 +24,8 @@ def jacobi(A, b, init_guess, error_tolerance, N=100):
 
         if e < error_tolerance:
             print(f'Converged after {iteration + 1} iterations with error {e:.6f}')
-            return u1, u2, u3, u4, u5, u6
+            return u1, u2, u3, u4, u5, u6,iteration+1
+
 
         x = np.array([u1, u2, u3, u4, u5, u6])
 
@@ -41,11 +45,11 @@ def gauss_seidel(A, b, init_guess, error_tolerance, N=100):
         print(f'Iteration {iteration + 1}: u1={u1}, u2={u2}, u3={u3}, u4={u4}, u5={u5}, u6={u6}')
 
         e= np.max(np.abs(x - np.array([u1, u2, u3, u4, u5, u6])))
-        print(f'Error: {e:.6f}')
+        # print(f'Error: {e:.6f}')
 
         if e < error_tolerance:
             print(f'Converged after {iteration + 1} iterations with error {e:.6f}')
-            return u1, u2, u3, u4, u5, u6
+            return u1, u2, u3, u4, u5, u6,iteration+1
         x=np.array([u1, u2, u3, u4, u5, u6])
     print(f'Did not converge after {iteration + 1} iterations')
 
@@ -68,15 +72,18 @@ def sor(A, b, init_guess, omega, error_tolerance, N=100):
         print(f'Iteration {iteration + 1}: u1={u1}, u2={u2}, u3={u3}, u4={u4}, u5={u5}, u6={u6}')
 
         e = np.max(np.abs(new_x - x))
-        ett=np.abs(new_x - x)
-        print(f'Error: {ett}')
+        # ett=np.abs(new_x - x)
+        # print(f'Error: {ett}')
         # print(f'Error: {e:.6f}')
 
-        if np.any(ett < error_tolerance):
+        if (e < error_tolerance):
             print(f'Converged after {iteration + 1} iterations with error {e:.6f}')
-            return u1, u2, u3, u4, u5, u6
+            return u1, u2, u3, u4, u5, u6, iteration+1
         x = new_x.copy()
     print(f'Failed to converge after {iteration + 1} iterations')
+
+
+
 
 # Define the matrix A, vector b, initial guess, and error tolerance
 A = np.array([[3, -1, 0, 0, 0, 1 / 2],
@@ -112,33 +119,39 @@ else:
 
 print("jacobi method")
 # Call the Jacobi function to find u1, u2, u3, u4, u5, u6
-u1, u2, u3, u4, u5, u6 = jacobi(A, b, init_guess, error_tolerance, N=100)
+u1, u2, u3, u4, u5, u6,iteration_jacobi = jacobi(A, b, init_guess, error_tolerance, N=100)
 
-print(f'Solution for jacobi:')
-print(f'u1={u1:6f}')
-print(f'u2={u2:6f}')
-print(f'u3={u3:6f}')
-print(f'u4={u4:6f}')
-print(f'u5={u5:6f}')
-print(f'u6={u6:6f}')
 print("gauss seidel method")
-g1,g2,g3,g4,g5,g6 = gauss_seidel(A, b, init_guess, error_tolerance, N=100)
-
-
-print(f'Solution for guass:')
-print(f'u1={g1:6f}')
-print(f'u2={g2:6f}')
-print(f'u3={g3:6f}')
-print(f'u4={g4:6f}')
-print(f'u5={g5:6f}')
-print(f'u6={g6:6f}')
+g1,g2,g3,g4,g5,g6,iteration_guass = gauss_seidel(A, b, init_guess, error_tolerance, N=100)
 
 print("sor method")
-s1,s2,s3,s4,s5,s6 = sor(A, b, init_guess, omega, error_tolerance, N=100)
-print(f'Solution for sor:')
-print(f'u1={s1:6f}')
-print(f'u2={s2:6f}')
-print(f'u3={s3:6f}')
-print(f'u4={s4:6f}')
-print(f'u5={s5:6f}')
-print(f'u6={s6:6f}')
+s1,s2,s3,s4,s5,s6,iteration_sor = sor(A, b, init_guess, omega, error_tolerance, N=100)
+
+
+
+table = f"""
+Solution:
+{'-'*26}
+{'Variable':<10}{'Jacobi':<25}{'Gauss-Seidel':<25}{'SOR':<15}
+{'-'*26}
+{'u1':<10}{u1:<25}{g1:<25}{s1:<15}
+{'u2':<10}{u2:<25}{g2:<25}{s2:<15}
+{'u3':<10}{u3:<25}{g3:<25}{s3:<15}
+{'u4':<10}{u4:<25}{g4:<25}{s4:<15}
+{'u5':<10}{u5:<25}{g5:<25}{s5:<15}
+{'u6':<10}{u6:<25}{g6:<25}{s6:<15}
+{'-'*26}
+"""
+
+# Print the formatted table
+print(table)
+
+
+
+print("number of iteration required to find the solution")
+print("jacobi method iteration",iteration_jacobi)
+print("gauss seidel method iteration",iteration_guass)
+print("sor method iteration",iteration_sor)
+print("amoung all the method jacobi method taking more iteration to find the solution because it neither taking updated values in that current iteration nor it dosn't have weights as sor ")
+print("When w= near to 1 we can call it as gauss seidel method eventhough both guassseidal and sor taking same iterations to find the solution but sor is more efficient because it has better convergence rate than gauss seidel method")
+print("SOR<GAUSS_SEIDEL<JACOBI")
